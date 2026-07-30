@@ -149,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderChartKategori(data);
         renderChartKelas(data);
         renderChartScatter(data);
+        renderChartCrisis(data);
     }
 
     // ===== UPDATE KPIs =====
@@ -321,7 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showlegend: true,
             legend: { orientation: 'h', y: 1.15, x: 0.5, xanchor: 'center', font: { color: '#64748B', size: 11 } },
             margin: { l: 60, r: 30, t: 30, b: 60 },
-            xaxis: { ...chartLayout.xaxis, title: { text: 'Anggaran IT (Juta Rp)', font: { size: 11, color: '#64748B' } }, automargin: true },
+            xaxis: { ...chartLayout.xaxis, title: { text: 'Anggaran IT (Juta Rp)', font: { size: 11, color: '#64748B' } }, automargin: true, dtick: 25, tick0: 0 },
             yaxis: { ...chartLayout.yaxis, title: { text: 'Skor Kematangan Digital', font: { size: 11, color: '#64748B' } }, automargin: true },
             annotations: [{
                 text: `Korelasi: r = ${corr.toFixed(3)}`,
@@ -349,9 +350,89 @@ document.addEventListener('DOMContentLoaded', () => {
         return denom === 0 ? 0 : num / denom;
     }
 
+    // ===== CHART 5: Crisis Tracker — Kuadran =====
+    function renderChartCrisis(data) {
+        const validData = data.filter(r => isFinite(r.skor_kematangan_digital) && isFinite(r.rata_rata_waktu_respons_rujukan_menit));
+
+        const medDigital = median(validData.map(r => r.skor_kematangan_digital));
+        const medRespons = median(validData.map(r => r.rata_rata_waktu_respons_rujukan_menit));
+
+        // Separate into 4 quadrants
+        const quadrants = {
+            'Optimal (Digital ↑ Response ↓)': { x: [], y: [], names: [] },
+            'Potensi (Digital ↑ Response ↑)': { x: [], y: [], names: [] },
+            'Perlu Bantuan (Digital ↓ Response ↓)': { x: [], y: [], names: [] },
+            'KRISIS (Digital ↓ Response ↑)': { x: [], y: [], names: [] }
+        };
+
+        const qColors = {
+            'Optimal (Digital ↑ Response ↓)': '#10B981',
+            'Potensi (Digital ↑ Response ↑)': '#F59E0B',
+            'Perlu Bantuan (Digital ↓ Response ↓)': '#3B82F6',
+            'KRISIS (Digital ↓ Response ↑)': '#EF4444'
+        };
+
+        validData.forEach(r => {
+            const highDig = r.skor_kematangan_digital >= medDigital;
+            const highResp = r.rata_rata_waktu_respons_rujukan_menit >= medRespons;
+            let q;
+            if (highDig && !highResp) q = 'Optimal (Digital ↑ Response ↓)';
+            else if (highDig && highResp) q = 'Potensi (Digital ↑ Response ↑)';
+            else if (!highDig && !highResp) q = 'Perlu Bantuan (Digital ↓ Response ↓)';
+            else q = 'KRISIS (Digital ↓ Response ↑)';
+
+            quadrants[q].x.push(r.skor_kematangan_digital);
+            quadrants[q].y.push(r.rata_rata_waktu_respons_rujukan_menit);
+            quadrants[q].names.push(r.nama_rumah_sakit);
+        });
+
+        const traces = Object.entries(quadrants).map(([name, vals]) => ({
+            x: vals.x, y: vals.y,
+            text: vals.names,
+            name: name,
+            type: 'scatter', mode: 'markers',
+            marker: { color: qColors[name], size: 8, opacity: 0.75,
+                      line: { width: name.includes('KRISIS') ? 2 : 0, color: '#DC2626' } },
+            hovertemplate: `%{text}<br>Digital: %{x:.1f}<br>Response: %{y:.1f} mnt<extra>${name}</extra>`
+        }));
+
+        Plotly.react('chartCrisis', traces, {
+            ...chartLayout,
+            showlegend: true,
+            legend: { orientation: 'h', y: 1.18, x: 0.5, xanchor: 'center', font: { color: '#64748B', size: 10 } },
+            margin: { l: 60, r: 30, t: 35, b: 60 },
+            xaxis: {
+                ...chartLayout.xaxis,
+                title: { text: 'Skor Kematangan Digital', font: { size: 11, color: '#64748B' } },
+                automargin: true
+            },
+            yaxis: {
+                ...chartLayout.yaxis,
+                title: { text: 'Waktu Respons Rujukan (menit)', font: { size: 11, color: '#64748B' } },
+                automargin: true
+            },
+            shapes: [
+                // Vertical median line
+                { type: 'line', x0: medDigital, x1: medDigital, y0: 0, y1: 1, yref: 'paper',
+                  line: { color: '#94A3B8', width: 1.5, dash: 'dash' } },
+                // Horizontal median line
+                { type: 'line', x0: 0, x1: 1, xref: 'paper', y0: medRespons, y1: medRespons,
+                  line: { color: '#94A3B8', width: 1.5, dash: 'dash' } }
+            ],
+            annotations: [
+                { text: `Median Digital: ${medDigital.toFixed(1)}`, showarrow: false,
+                  xref: 'paper', yref: 'paper', x: 0.01, y: 0.01,
+                  font: { size: 10, color: '#94A3B8' }, bgcolor: 'rgba(255,255,255,0.8)', borderpad: 4 },
+                { text: `Median Response: ${medRespons.toFixed(1)} mnt`, showarrow: false,
+                  xref: 'paper', yref: 'paper', x: 0.99, y: 0.99, xanchor: 'right',
+                  font: { size: 10, color: '#94A3B8' }, bgcolor: 'rgba(255,255,255,0.8)', borderpad: 4 }
+            ]
+        }, config);
+    }
+
     // ===== RESIZE HANDLER =====
     window.addEventListener('resize', () => {
-        ['chartProvinsi', 'chartKategori', 'chartKelas', 'chartScatter'].forEach(id => {
+        ['chartProvinsi', 'chartKategori', 'chartKelas', 'chartScatter', 'chartCrisis'].forEach(id => {
             Plotly.Plots.resize(id);
         });
     });
