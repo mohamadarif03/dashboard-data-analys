@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Hospital Nusantara - Executive Dashboard</title>
+    <meta name="description" content="Dashboard analitik kematangan digital dan efisiensi operasional rumah sakit di Indonesia">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <h1 class="page-title">SMART HOSPITAL NUSANTARA — EXECUTIVE DASHBOARD</h1>
+                </div>
+                <div class="top-bar-right">
+                    <div class="badge-live"><span class="dot"></span> Live Data</div>
+                </div>
+            </header>
+
+            <!-- KPI Row -->
+            <section class="kpi-row">
+                <div class="kpi-card kpi-blue">
+                    <div class="kpi-icon-wrap"><span class="material-symbols-rounded">local_hospital</span></div>
+                    <div class="kpi-info">
+                        <p class="kpi-label">Total Rumah Sakit</p>
+                        <h3 class="kpi-value" id="kpiTotal">276</h3>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-cyan">
+                    <div class="kpi-icon-wrap"><span class="material-symbols-rounded">devices</span></div>
+                    <div class="kpi-info">
+                        <p class="kpi-label">Skor Digital (Avg)</p>
+                        <h3 class="kpi-value" id="kpiDigital">57.0</h3>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-green">
+                    <div class="kpi-icon-wrap"><span class="material-symbols-rounded">link</span></div>
+                    <div class="kpi-info">
+                        <p class="kpi-label">Integrasi SatuSehat</p>
+                        <h3 class="kpi-value" id="kpiSatu">85.9%</h3>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-amber">
+                    <div class="kpi-icon-wrap"><span class="material-symbols-rounded">bolt</span></div>
+                    <div class="kpi-info">
+                        <p class="kpi-label">Efisiensi (Avg)</p>
+                        <h3 class="kpi-value" id="kpiEff">65.9</h3>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-red">
+                    <div class="kpi-icon-wrap"><span class="material-symbols-rounded">crisis_alert</span></div>
+                    <div class="kpi-info">
+                        <p class="kpi-label">RS Status Krisis</p>
+                        <h3 class="kpi-value" id="kpiCrisis">84</h3>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-purple">
+                    <div class="kpi-icon-wrap"><span class="material-symbols-rounded">video_call</span></div>
+                    <div class="kpi-info">
+                        <p class="kpi-label">Avg Telemedicine</p>
+                        <h3 class="kpi-value" id="kpiTele">138/bln</h3>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Content Area -->
+            <div class="content-area">
+
+                <!-- Left Filters Panel -->
+                <aside class="filters-panel">
+                    <div class="filter-card">
+                        <div class="filter-header">
+                            <span class="material-symbols-rounded">filter_alt</span>
+                            <h4>Filter Data</h4>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>Kelas RS</label>
+                            <div class="filter-chips" id="filterKelas">
+                                <button class="chip active" data-val="all">Semua</button>
+                                <button class="chip" data-val="A">A</button>
+                                <button class="chip" data-val="B">B</button>
+                                <button class="chip" data-val="C">C</button>
+                                <button class="chip" data-val="D">D</button>
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>Kepemilikan</label>
+                            <div class="filter-chips vertical" id="filterKepemilikan">
+                                <button class="chip active" data-val="all">Semua</button>
+                                <button class="chip" data-val="swasta">Swasta</button>
+                                <button class="chip" data-val="pemda">Pemda</button>
+                                <button class="chip" data-val="tni">TNI/POLRI</button>
+                                <button class="chip" data-val="pusat">Pem. Pusat</button>
+                                <button class="chip" data-val="bumn">BUMN</button>
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>Status RME</label>
+                            <div class="filter-chips" id="filterRME">
+                                <button class="chip active" data-val="all">Semua</button>
+                                <button class="chip" data-val="ya">Ya</button>
+                                <button class="chip" data-val="tidak">Tidak</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mini Stats Card -->
+                    <div class="mini-stats-card">
+                        <h4>Ringkasan Operasional</h4>
+                        <div class="mini-stat">
+                            <span>Avg BOR</span>
+                            <strong>68.0%</strong>
+                        </div>
+                        <div class="mini-stat">
+                            <span>Avg LOS</span>
+                            <strong>4.2 hari</strong>
+                        </div>
+                        <div class="mini-stat">
+                            <span>Avg Response</span>
+                            <strong>45.6 menit</strong>
+                        </div>
+                        <div class="mini-stat">
+                            <span>RME Ya</span>
+                            <strong>254 RS</strong>
+                        </div>
+                        <div class="mini-stat">
+                            <span>RME Tidak</span>
+                            <strong>22 RS</strong>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Charts Grid -->
+                <div class="charts-grid">
+
+                    <!-- Row 1: Main Overview Charts -->
+                    <div class="chart-card span-2">
+                        <div class="chart-title-bar">
+                            <h3>Skor Digital vs Efisiensi per Provinsi (Top 10)</h3>
+                        </div>
+                        <div class="chart-body" id="chartProvinsi"></div>
+                    </div>
+
+                    <!-- Row 2: Donut + Bar -->
+                    <div class="chart-card">
+                        <div class="chart-title-bar">
+                            <h3>Kategori Kematangan Digital</h3>
+                        </div>
+                        <div class="chart-body" id="chartKategori"></div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-title-bar">
+                            <h3>Distribusi per Kelas RS</h3>
+                        </div>
+                        <div class="chart-body" id="chartKelas"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Full Width Charts Row -->
+            <div class="full-width-charts">
+                <div class="chart-card">
+                    <div class="chart-title-bar">
+                        <h3>Anggaran IT vs Skor Digital</h3>
+                    </div>
+                    <div class="chart-body" id="chartScatter"></div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
